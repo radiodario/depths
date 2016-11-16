@@ -20,8 +20,7 @@ class ofApp : public ofBaseApp {
     ofParameter<float> timeStep;
     ofParameter<float> particleNeighborhood, particleRepulsion;
     ofParameter<float> centerAttraction;
-    ofParameter<float> minAlpha;
-    ofParameter<float> maxAlpha;
+    ofParameter<bool> absoluteValues;
 
     ofParameter<bool> zoomEnabled;
     ofParameter<float> zoomCenterX;
@@ -39,9 +38,12 @@ class ofApp : public ofBaseApp {
 
     ofParameter<bool> grEnabled;
     ofParameter<bool> fxaaEnabled;
+
     ofParameter<int> red;
     ofParameter<int> green;
     ofParameter<int> blue;
+    ofParameter<float> minAlpha;
+    ofParameter<float> maxAlpha;
 
     float padding;
 
@@ -50,6 +52,7 @@ class ofApp : public ofBaseApp {
     bool isMousePressed, slowMotion;
 
     bool drawBalls;
+    bool drawGui;
     ofxPostProcessing post;
     shared_ptr<ZoomBlurPass> zbpass;
     shared_ptr<GodRaysPass> grpass;

@@ -9,9 +9,9 @@ void ofApp::setup(){
   // because the screen is not subdivided enough. if
   // it's too low, the bins take up so much memory as to
   // become inefficient.
-  int binPower = 5;
+  int binPower = 10;
 
-  padding = 256;
+  padding = 64;
   particleSystem.setup(ofGetWidth() + padding * 2, ofGetHeight() + padding * 2, binPower);
 
   kBinnedParticles = 3200;
@@ -24,6 +24,7 @@ void ofApp::setup(){
 
   isMousePressed = false;
   slowMotion = true;
+  drawGui = false;
   gui.setup();
   ofParameterGroup group_simulation;
   group_simulation.setName("simulation");
@@ -64,6 +65,7 @@ void ofApp::setup(){
   // colours
   ofParameterGroup group_colour;
   group_colour.setName("Colour");
+  group_colour.add(absoluteValues.set("Absolute Values", true));
   group_colour.add(minAlpha.set("min alpha", 5, 0, 255));
   group_colour.add(maxAlpha.set("max alpha", 155, 0, 255));
   group_colour.add(red.set("red", 255, 0, 255));
@@ -109,7 +111,7 @@ void ofApp::handleOSCMessages() {
     if (msgAddress == "/timeStep") {
       timeStep = m.getArgAsFloat(0);
     }
-    if (msgAddress == "/particleNeighbourhood") {
+    if (msgAddress == "/particleNeighborhood") {
       particleNeighborhood = m.getArgAsFloat(0);
     }
     if (msgAddress == "/particleRepulsion") {
@@ -173,6 +175,9 @@ void ofApp::handleOSCMessages() {
     if (msgAddress == "/blue") {
       blue = m.getArgAsInt(0);
     }
+    if (msgAddress == "/absoluteValues") {
+      absoluteValues = m.getArgAsBool(0);
+    }
   }
 }
 
@@ -197,8 +202,14 @@ void ofApp::draw(){
   }
   for(int i = 0; i < particleSystem.size(); i++) {
     BinnedParticle& cur = particleSystem[i];
-    float alphav = ofMap(cur.xv + cur.yv, 0, 20, minAlpha, maxAlpha);
-    float alphaf = ofMap(cur.xf + cur.yf, 0, 20, minAlpha, maxAlpha);
+    float alphav, alphaf;
+    if (absoluteValues) {
+       alphav = ofMap(abs(cur.xv) + abs(cur.yv), 0, 20, minAlpha, maxAlpha);
+       alphaf = ofMap(abs(cur.xf) + abs(cur.yf), 0, 20, minAlpha, maxAlpha);
+    } else {
+       alphav = ofMap((cur.xv) + (cur.yv), 0, 20, minAlpha, maxAlpha);
+       alphaf = ofMap((cur.xf) + (cur.yf), 0, 20, minAlpha, maxAlpha);
+    }
     float alpha = alphav * 0.5 + alphaf * 0.5;
     ofSetColor(red, green, blue, alpha);
     // global force on other particles
@@ -230,7 +241,7 @@ void ofApp::draw(){
   ofSetColor(255);
   ofDrawBitmapString(ofToString(kBinnedParticles) + " particles", 32, 32);
   ofDrawBitmapString(ofToString((int) ofGetFrameRate()) + " fps", 32, 52);
-  gui.draw();
+  if (drawGui) gui.draw();
 }
 
 void ofApp::keyPressed(int key){
@@ -246,6 +257,9 @@ void ofApp::keyPressed(int key){
   }
   if(key == 'b') {
     drawBalls = !drawBalls;
+  }
+  if (key == 'h') {
+    drawGui = !drawGui;
   }
 }
 
