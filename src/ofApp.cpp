@@ -24,31 +24,51 @@ void ofApp::setup(){
   isMousePressed = false;
   slowMotion = true;
   gui.setup();
-  gui.add(timeStep.set("Time Step", 100, 1, 1000));
-  gui.add(particleNeighborhood.set("P. Neighborhood", 32, 1, 256));
-  gui.add(particleRepulsion.set("P. Repulsion", 0.2, 0.0, 1.0));
-  gui.add(centerAttraction.set("Center Attraction", 0.01, 0.0, 1.0));
-  gui.add(minAlpha.set("min alpha", 5, 0, 255));
-  gui.add(maxAlpha.set("max alpha", 155, 0, 255));
+  ofParameterGroup group_simulation;
+  group_simulation.setName("simulation");
+  group_simulation.add(timeStep.set("Time Step", 100, 1, 1000));
+  group_simulation.add(particleNeighborhood.set("P. Neighborhood", 64, 1, 256));
+  group_simulation.add(particleRepulsion.set("P. Repulsion", 0.5, 0.0, 1.0));
+  group_simulation.add(centerAttraction.set("Center Attraction", 0.01, 0.0, 1.0));
+  gui.add(group_simulation);
 
   // zoom pass
-  gui.add(zoomCenterX.set("z Center X", 0.5, 0, 1));
-  gui.add(zoomCenterY.set("z Center Y", 0.5, 0, 1));
-  gui.add(zoomExposure.set("z Exposure", 0.48, 0, 1));
-  gui.add(zoomDecay.set("z Decay", 0.9, 0, 1));
-  gui.add(zoomDensity.set("z Density", 0.25, 0, 1));
-  gui.add(zoomWeight.set("z Weight", 0.24, 0, 1));
-  gui.add(zoomClamp.set("z Clamp", 1, 0, 1));
+  ofParameterGroup group_zoom;
+  group_zoom.setName("Zoom Blur");
+  group_zoom.add(zoomEnabled.set("Enabled", true));
+  group_zoom.add(zoomCenterX.set("z Center X", 0.5, 0, 1));
+  group_zoom.add(zoomCenterY.set("z Center Y", 0.5, 0, 1));
+  group_zoom.add(zoomExposure.set("z Exposure", 0.48, 0, 1));
+  group_zoom.add(zoomDecay.set("z Decay", 0.9, 0, 1));
+  group_zoom.add(zoomDensity.set("z Density", 0.25, 0, 1));
+  group_zoom.add(zoomWeight.set("z Weight", 0.24, 0, 1));
+  group_zoom.add(zoomClamp.set("z Clamp", 1, 0, 1));
+  gui.add(group_zoom);
 
   // dof pass
-  gui.add(dofFocus.set("dof Focus", 0.985, 0, 1));
-  gui.add(dofAperture.set("dof Aperture", 0.8, 0, 1));
-  gui.add(dofMaxBlur.set("dof Max Blur", 0.6, 0, 1));
+  ofParameterGroup group_dof;
+  group_dof.setName("Depth of Field");
+  group_dof.add(dofEnabled.set("dof", true));
+  group_dof.add(dofFocus.set("dof Focus", 0.985, 0, 1));
+  group_dof.add(dofAperture.set("dof Aperture", 0.8, 0, 1));
+  group_dof.add(dofMaxBlur.set("dof Max Blur", 0.6, 0, 1));
+  gui.add(group_dof);
+
+  ofParameterGroup group_post;
+  group_post.setName("Postprocessing");
+  group_post.add(grEnabled.set("God Rays", true));
+  group_post.add(fxaaEnabled.set("fxaa", true));
+  gui.add(group_post);
 
   // colours
-  gui.add(red.set("red", 255, 0, 255));
-  gui.add(green.set("green", 250, 0, 255));
-  gui.add(blue.set("blue", 255, 0, 255));
+  ofParameterGroup group_colour;
+  group_colour.setName("Colour");
+  group_colour.add(minAlpha.set("min alpha", 5, 0, 255));
+  group_colour.add(maxAlpha.set("max alpha", 155, 0, 255));
+  group_colour.add(red.set("red", 255, 0, 255));
+  group_colour.add(green.set("green", 250, 0, 255));
+  group_colour.add(blue.set("blue", 255, 0, 255));
+  gui.add(group_colour);
   drawBalls = false;
 
   post.init(ofGetWidth(), ofGetHeight());
@@ -56,10 +76,11 @@ void ofApp::setup(){
   dfpass = post.createPass<DofPass>();
   zbpass = post.createPass<ZoomBlurPass>();
   grpass = post.createPass<GodRaysPass>();
-  post.createPass<FxaaPass>();
+  fxpass = post.createPass<FxaaPass>();
 }
 
 void ofApp::update(){
+  zbpass->setEnabled(zoomEnabled);
   zbpass->setCenterX(zoomCenterX);
   zbpass->setCenterY(zoomCenterY);
   zbpass->setExposure(zoomExposure);
@@ -68,10 +89,13 @@ void ofApp::update(){
   zbpass->setWeight(zoomWeight);
   zbpass->setClamp(zoomClamp);
 
+  dfpass->setEnabled(dofEnabled);
   dfpass->setFocus(dofFocus);
   dfpass->setAperture(dofAperture);
   dfpass->setMaxBlur(dofMaxBlur);
 
+  grpass->setEnabled(grEnabled);
+  fxpass->setEnabled(fxaaEnabled);
 }
 
 void ofApp::draw(){
@@ -94,8 +118,9 @@ void ofApp::draw(){
   }
   for(int i = 0; i < particleSystem.size(); i++) {
     BinnedParticle& cur = particleSystem[i];
-    float alpha = ofMap(cur.xv + cur.yv, 0, 20, minAlpha, maxAlpha);
-    //float alpha = ofMap(cur.xf + cur.yf, 0, 20, minAlpha, maxAlpha);
+    float alphav = ofMap(cur.xv + cur.yv, 0, 20, minAlpha, maxAlpha);
+    float alphaf = ofMap(cur.xf + cur.yf, 0, 20, minAlpha, maxAlpha);
+    float alpha = alphav * 0.5 + alphaf * 0.5;
     ofSetColor(red, green, blue, alpha);
     // global force on other particles
     particleSystem.addRepulsionForce(cur, particleNeighborhood, particleRepulsion);

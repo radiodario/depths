@@ -22,6 +22,7 @@ class ofApp : public ofBaseApp {
     ofParameter<float> minAlpha;
     ofParameter<float> maxAlpha;
 
+    ofParameter<bool> zoomEnabled;
     ofParameter<float> zoomCenterX;
     ofParameter<float> zoomCenterY;
     ofParameter<float> zoomExposure;
@@ -30,10 +31,13 @@ class ofApp : public ofBaseApp {
     ofParameter<float> zoomWeight;
     ofParameter<float> zoomClamp;
 
+    ofParameter<bool> dofEnabled;
     ofParameter<float> dofFocus;
     ofParameter<float> dofAperture;
     ofParameter<float> dofMaxBlur;
 
+    ofParameter<bool> grEnabled;
+    ofParameter<bool> fxaaEnabled;
     ofParameter<int> red;
     ofParameter<int> green;
     ofParameter<int> blue;
@@ -49,4 +53,5 @@ class ofApp : public ofBaseApp {
     shared_ptr<ZoomBlurPass> zbpass;
     shared_ptr<GodRaysPass> grpass;
     shared_ptr<DofPass> dfpass;
+    shared_ptr<FxaaPass> fxpass;
 };
