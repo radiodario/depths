@@ -32,6 +32,8 @@ void ofApp::setup(){
   group_simulation.add(particleNeighborhood.set("P. Neighborhood", 64, 1, 256));
   group_simulation.add(particleRepulsion.set("P. Repulsion", 0.5, 0.0, 1.0));
   group_simulation.add(centerAttraction.set("Center Attraction", 0.01, 0.0, 1.0));
+  group_simulation.add(attractorCenterX.set("Attractor X", 0.5, 0.0, 1.0));
+  group_simulation.add(attractorCenterY.set("Attractor Y", 0.5, 0.0, 1.0));
   gui.add(group_simulation);
 
   // zoom pass
@@ -133,6 +135,10 @@ void ofApp::handleOSCMessages() {
       zoomCenterX = m.getArgAsFloat(0);
       zoomCenterY = m.getArgAsFloat(1);
     }
+    if (msgAddress == "/attractorCenter") {
+      attractorCenterX = m.getArgAsFloat(0);
+      attractorCenterY = 1 - m.getArgAsFloat(1);
+    }
     if (msgAddress == "/zoomExposure") {
       zoomExposure = m.getArgAsFloat(0);
     }
@@ -223,7 +229,12 @@ void ofApp::draw(){
   }
 
   // single-pass global forces
-  particleSystem.addAttractionForce(particleSystem.getWidth() / 2, particleSystem.getHeight() / 2, particleSystem.getWidth() * 100, centerAttraction);
+  particleSystem.addAttractionForce(
+      particleSystem.getWidth() * attractorCenterX,
+      particleSystem.getHeight() * attractorCenterY,
+      particleSystem.getWidth() * 100,
+      centerAttraction
+  );
   if(isMousePressed) {
     particleSystem.addRepulsionForce(mouseX + padding, mouseY + padding, 200, 1);
   }

@@ -45,6 +45,10 @@ class ofApp : public ofBaseApp {
     ofParameter<float> minAlpha;
     ofParameter<float> maxAlpha;
 
+    ofParameter<float> attractorCenterX;
+    ofParameter<float> attractorCenterY;
+    ofParameter<float> attractorRadius;
+
     float padding;
 
     int kBinnedParticles;
