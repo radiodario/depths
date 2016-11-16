@@ -1,6 +1,7 @@
 #include "ofApp.h"
 
 void ofApp::setup(){
+  receive.setup(5002);
   ofSetVerticalSync(true);
   // this number describes how many bins are used
   // on my machine, 2 is the ideal number (2^2 = 4x4 pixel bins)
@@ -80,6 +81,7 @@ void ofApp::setup(){
 }
 
 void ofApp::update(){
+  handleOSCMessages();
   zbpass->setEnabled(zoomEnabled);
   zbpass->setCenterX(zoomCenterX);
   zbpass->setCenterY(zoomCenterY);
@@ -97,6 +99,83 @@ void ofApp::update(){
   grpass->setEnabled(grEnabled);
   fxpass->setEnabled(fxaaEnabled);
 }
+
+void ofApp::handleOSCMessages() {
+  while (receive.hasWaitingMessages()) {
+    ofxOscMessage m;
+    receive.getNextMessage(&m);
+    string msgAddress = m.getAddress();
+
+    if (msgAddress == "/timeStep") {
+      timeStep = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/particleNeighbourhood") {
+      particleNeighborhood = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/particleRepulsion") {
+      particleRepulsion = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/centerAttraction") {
+      centerAttraction = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/minAlpha") {
+      minAlpha = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/maxAlpha") {
+      maxAlpha = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/zoomEnabled") {
+      zoomEnabled = m.getArgAsBool(0);
+    }
+    if (msgAddress == "/zoomCenter") {
+      zoomCenterX = m.getArgAsFloat(0);
+      zoomCenterY = m.getArgAsFloat(1);
+    }
+    if (msgAddress == "/zoomExposure") {
+      zoomExposure = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/zoomDecay") {
+      zoomDecay = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/zoomDensity") {
+      zoomDensity = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/zoomWeight") {
+      zoomWeight = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/zoomClamp") {
+      zoomClamp = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/dofEnabled") {
+      dofEnabled = m.getArgAsBool(0);
+    }
+    if (msgAddress == "/dofFocus") {
+      dofFocus = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/dofAperture") {
+      dofAperture = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/dofMaxBlur") {
+      dofMaxBlur = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/grEnabled") {
+      grEnabled = m.getArgAsBool(0);
+    }
+    if (msgAddress == "/fxaaEnabled") {
+      fxaaEnabled = m.getArgAsBool(0);
+    }
+    if (msgAddress == "/red") {
+      red = m.getArgAsInt(0);
+    }
+    if (msgAddress == "/green") {
+      green = m.getArgAsInt(0);
+    }
+    if (msgAddress == "/blue") {
+      blue = m.getArgAsInt(0);
+    }
+  }
+}
+
 
 void ofApp::draw(){
   post.begin();

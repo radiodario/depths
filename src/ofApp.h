@@ -3,6 +3,7 @@
 #include "BinnedParticleSystem.h"
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxOsc.h"
 #include "ofxPostProcessing.h"
 
 class ofApp : public ofBaseApp {
@@ -14,7 +15,7 @@ class ofApp : public ofBaseApp {
     void keyPressed  (int key);
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
-
+    void handleOSCMessages();
     ofxPanel gui;
     ofParameter<float> timeStep;
     ofParameter<float> particleNeighborhood, particleRepulsion;
@@ -54,4 +55,7 @@ class ofApp : public ofBaseApp {
     shared_ptr<GodRaysPass> grpass;
     shared_ptr<DofPass> dfpass;
     shared_ptr<FxaaPass> fxpass;
+
+    ofxOscReceiver receive;
+
 };
