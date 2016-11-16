@@ -20,6 +20,7 @@ class ofApp : public ofBaseApp {
     ofParameter<float> timeStep;
     ofParameter<float> particleNeighborhood, particleRepulsion;
     ofParameter<float> centerAttraction;
+    ofParameter<float> dampingForce;
     ofParameter<bool> absoluteValues;
 
     ofParameter<bool> zoomEnabled;
@@ -64,5 +65,6 @@ class ofApp : public ofBaseApp {
     shared_ptr<FxaaPass> fxpass;
 
     ofxOscReceiver receive;
+    ofxOscSender send;
 
 };

@@ -2,6 +2,7 @@
 
 void ofApp::setup(){
   receive.setup(5002);
+  send.setup("localhost", 5003);
   ofSetVerticalSync(true);
   // this number describes how many bins are used
   // on my machine, 2 is the ideal number (2^2 = 4x4 pixel bins)
@@ -32,6 +33,7 @@ void ofApp::setup(){
   group_simulation.add(particleNeighborhood.set("P. Neighborhood", 64, 1, 256));
   group_simulation.add(particleRepulsion.set("P. Repulsion", 0.5, 0.0, 1.0));
   group_simulation.add(centerAttraction.set("Center Attraction", 0.01, 0.0, 1.0));
+  group_simulation.add(dampingForce.set("Damping Force", 0.01, 0.0, 1.0));
   group_simulation.add(attractorCenterX.set("Attractor X", 0.5, 0.0, 1.0));
   group_simulation.add(attractorCenterY.set("Attractor Y", 0.5, 0.0, 1.0));
   gui.add(group_simulation);
@@ -121,6 +123,9 @@ void ofApp::handleOSCMessages() {
     }
     if (msgAddress == "/centerAttraction") {
       centerAttraction = m.getArgAsFloat(0);
+    }
+    if (msgAddress == "/dampingForce") {
+      dampingForce = m.getArgAsFloat(0);
     }
     if (msgAddress == "/minAlpha") {
       minAlpha = m.getArgAsFloat(0);
@@ -222,7 +227,7 @@ void ofApp::draw(){
     particleSystem.addRepulsionForce(cur, particleNeighborhood, particleRepulsion);
     // forces on this particle
     cur.bounceOffWalls(0, 0, particleSystem.getWidth(), particleSystem.getHeight());
-    cur.addDampingForce();
+    cur.addDampingForce(dampingForce);
   }
   if(!drawBalls) {
     glEnd();
