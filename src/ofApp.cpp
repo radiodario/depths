@@ -10,7 +10,7 @@ void ofApp::setup(){
   // because the screen is not subdivided enough. if
   // it's too low, the bins take up so much memory as to
   // become inefficient.
-  int binPower = 10;
+  int binPower = 4;
 
   padding = 64;
   particleSystem.setup(ofGetWidth() + padding * 2, ofGetHeight() + padding * 2, binPower);
